@@ -82,10 +82,17 @@ foreach ($usbDeviceID in $usbDeviceIDs) {
 }
 
 # Arrêter uniquement les services Tobii en cours d'exécution
-Get-Service | Where-Object { $_.DisplayName -match $serviceNamePattern -and $_.Status -eq 'Running' } | ForEach-Object {
-    Stop-Service -Name $_.Name
-    Write-Host "Arrêt du service $($_.DisplayName)"
-    Write-Log "Arrêt du service $($_.DisplayName)"
+$tobiiServicesRunning = Get-Service | Where-Object { $_.DisplayName -match $serviceNamePattern -and $_.Status -eq 'Running' }
+
+if ($tobiiServicesRunning) {
+    $tobiiServicesRunning | ForEach-Object {
+        Stop-Service -Name $_.Name
+        Write-Host "Arrêt du service $($_.DisplayName)"
+        Write-Log "Arrêt du service $($_.DisplayName)"
+    }
+} else {
+    Write-Host "Aucun service Tobii en cours d'exécution."
+    Write-Log "Aucun service Tobii en cours d'exécution."
 }
 
 # Boucle principale de surveillance
