@@ -39,9 +39,6 @@ function Write-Log {
     }
 }
 
-# Ajout d'une nouvelle occurence dans la log
-"--- Nouvelle exécution du script : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ---" | Out-File -Append -FilePath $logFile
-
 # Fonction pour désactiver un périphérique USB via WMI si celui-ci est actif
 function Disable-USBDevice {
     param ($deviceID)
@@ -77,20 +74,18 @@ function Enable-USBDevice {
 # État initial de l'application
 $applicationRunning = $false
 
-# Initialisation : désactivation des périphériques USB et arrêt des services Tobii
-Write-Host "Initialisation : vérification et désactivation des périphériques USB, arrêt des services Tobii."
-Write-Log "Initialisation : vérification et désactivation des périphériques USB, arrêt des services Tobii."
+# Ajout d'une nouvelle occurence dans la log
+"--- Nouvelle exécution du script : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ---" | Out-File -Append -FilePath $logFile
 
 foreach ($usbDeviceID in $usbDeviceIDs) {
     Disable-USBDevice -deviceID $usbDeviceID
 }
 
-Get-Service | Where-Object { $_.DisplayName -match $serviceNamePattern } | ForEach-Object {
-    if ($_.Status -eq 'Running') {
-        Stop-Service -Name $_.Name
-        Write-Host "Arrêt du service $($_.DisplayName)"
-        Write-Log "Arrêt du service $($_.DisplayName)"
-    }
+# Arrêter uniquement les services Tobii en cours d'exécution
+Get-Service | Where-Object { $_.DisplayName -match $serviceNamePattern -and $_.Status -eq 'Running' } | ForEach-Object {
+    Stop-Service -Name $_.Name
+    Write-Host "Arrêt du service $($_.DisplayName)"
+    Write-Log "Arrêt du service $($_.DisplayName)"
 }
 
 # Boucle principale de surveillance
