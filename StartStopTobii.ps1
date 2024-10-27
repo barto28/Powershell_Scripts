@@ -1,4 +1,12 @@
+# Description : Ce script surveille la présence de l'executable de Star Citizen :
+# Si l'exe est detecté les service Tobii sont lancés et les joystick Virpil USB sont activés.
+# Lorsque Star Citizen est fermé, les joystick ainsi que les services tobii sont désactivés.
+# Il est ensuite demandé à l'utilisateur si il veut fermer RSI Launcher.
+# L'objectif est de permettre la bonne mise en veille de l'écran et de l'ordinateur qui sont bloqués par RSI Launcher, les joystick USB et les services Tobii. 
+
+#bypass de la politique d'execution powershell
 Set-ExecutionPolicy -Scope CurrentUser Bypass
+
 # Nom du processus de Star Citizen (sans .exe)
 $applicationName = "starcitizen"
 
