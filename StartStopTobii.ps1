@@ -22,15 +22,25 @@ $usbDeviceIDs = @("USB\VID_3344&PID_03EB\FF", "USB\VID_3344&PID_43EB\FF")
 # Définition du fichier de log
 $logFile = Join-Path -Path (Split-Path -Parent $MyInvocation.MyCommand.Path) -ChildPath "Log_EtatExecution.txt"
 
+# Limite de lignes pour le fichier de log
+$maxLogLines = 100
+
 # Fonction pour écrire une entrée dans le fichier de log
 function Write-Log {
     param ($message)
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     "$timestamp - $message" | Out-File -FilePath $logFile -Append
+
+    # Limiter le fichier de log au nombre maximum de lignes ($maxLogLines)
+    $logContent = Get-Content -Path $logFile
+    if ($logContent.Count -gt $maxLogLines) {
+        $logContent = $logContent[-$maxLogLines..-1]  # Garde seulement les $maxLogLines dernières lignes
+        $logContent | Set-Content -Path $logFile      # Réécrit le fichier de log avec ces lignes
+    }
 }
 
-# Écraser le fichier de log au début de chaque exécution
-"--- Nouvelle exécution du script : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ---" | Out-File -FilePath $logFile
+# Ajout d'une nouvelle occurence dans la log
+"--- Nouvelle exécution du script : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ---" | Out-File -Append -FilePath $logFile
 
 # Fonction pour désactiver un périphérique USB via WMI si celui-ci est actif
 function Disable-USBDevice {
